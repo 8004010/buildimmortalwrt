@@ -27,11 +27,17 @@ jobs:
       run: |
         grep 'CONFIG_PACKAGE_' .config | sed 's/CONFIG_PACKAGE_//g' | sed 's/=y//g' > package_list.txt
 
+    - name: Split package list into chunks
+      run: |
+        split -l 100 package_list.txt package_chunk_
+
     - name: Build firmware
       run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
-          immortalwrt/imagebuilder:x86-64-openwrt-24.10.0 \
-          sh -c 'make image PROFILE=generic FILES=/workspace/soft PACKAGES="$(cat package_list.txt)"'
+        for chunk in package_chunk_*; do
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
+            immortalwrt/imagebuilder:x86-64-openwrt-24.10.0 \
+            sh -c 'make image PROFILE=generic FILES=/workspace/soft PACKAGES="$(cat $chunk)"'
+        done
 
     - name: Upload firmware to Artifacts
       uses: actions/upload-artifact@v4
