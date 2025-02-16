@@ -31,7 +31,7 @@ jobs:
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
           immortalwrt/imagebuilder:x86-64-openwrt-24.10.0 \
-          make image PROFILE=generic FILES=/workspace/soft PACKAGES=$(cat .config | grep CONFIG_PACKAGE_ | sed 's/CONFIG_PACKAGE_//g' | sed 's/=y//g')
+          make image PROFILE=generic FILES=/workspace/soft PACKAGES="$(grep 'CONFIG_PACKAGE_' .config | sed 's/CONFIG_PACKAGE_//g' | sed 's/=y//g')"
 
     - name: Upload firmware to Artifacts
       uses: actions/upload-artifact@v4
