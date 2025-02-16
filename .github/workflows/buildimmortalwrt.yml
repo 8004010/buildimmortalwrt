@@ -23,11 +23,15 @@ jobs:
       run: |
         docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.0
 
+    - name: List files in workspace for debugging
+      run: |
+        ls -al /home/runner/work/buildimmortalwrt/buildimmortalwrt
+
     - name: Build firmware
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
           immortalwrt/imagebuilder:x86-64-openwrt-24.10.0 \
-          make
+          make image PROFILE=generic FILES=/workspace/soft PACKAGES=$(cat .config | grep CONFIG_PACKAGE_ | sed 's/CONFIG_PACKAGE_//g' | sed 's/=y//g')
 
     - name: Upload firmware to Artifacts
       uses: actions/upload-artifact@v4
